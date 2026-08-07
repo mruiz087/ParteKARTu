@@ -10,13 +10,13 @@ const assets = [
     'js/flexible/api.js',
     'js/flexible/ui.js',
     'js/fixed/config.js',
+    'js/fixed/utils.js',
     'js/fixed/groups.js',
     'js/fixed/calendar.js',
     'js/fixed/trips.js',
     'js/fixed/debts.js',
     'js/fixed/modals.js',
     'js/fixed/profile.js',
-    'js/fixed/utils.js',
     'js/parking/logic.js',
     'js/parking/groups.js',
     'js/parking/ui.js'
@@ -28,7 +28,7 @@ self.addEventListener('install', e => {
     e.waitUntil(
         caches.open(CACHE_NAME).then(cache => {
             console.log('Cacheando nuevos archivos');
-            return cache.addAll(ASSETS);
+            return cache.addAll(assets);
         })
     );
 });

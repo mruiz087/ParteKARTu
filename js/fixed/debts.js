@@ -163,6 +163,7 @@ async function simplificarDeudas(groupId) {
 
 async function abrirCanjeDeuda() {
     const date = document.getElementById('modal-viaje').dataset.date;
+    if (!assertNotPastDate(date)) return;
     const listContainer = document.getElementById('deudas-list');
     if (!listContainer) return;
 
@@ -199,6 +200,7 @@ async function abrirCanjeDeuda() {
 
 async function ejecutarCanje(deuda, date) {
     if (!currentGroupId || !currentUser) return;
+    if (!assertNotPastDate(date)) return;
     try {
         const { data: existing } = await _supabase.schema('fixed_carpooling').from('fixed_trips')
             .select('id')
@@ -239,6 +241,7 @@ async function ejecutarCanje(deuda, date) {
 }
 
 async function ejecutarUnionPuntual(trip) {
+    if (trip?.date && !assertNotPastDate(trip.date)) return;
     try {
         const pasajeros = trip.metadata?.pasajeros || [];
 

@@ -98,12 +98,13 @@ function getRecommendedDriver(dateStr) {
     const { dias, fecha_inicio } = rutina;
     if (!dias || dias.length === 0) return null;
 
-    const targetDate = new Date(dateStr);
+    const targetDate = parseLocalDate(dateStr);
     targetDate.setHours(0, 0, 0, 0);
 
     if (!dias.includes(targetDate.getDay())) return null;
 
-    const startDate = new Date(fecha_inicio || '2025-01-01');
+    const startRaw = (fecha_inicio || '2025-01-01').slice(0, 10);
+    const startDate = parseLocalDate(startRaw);
     startDate.setHours(0, 0, 0, 0);
 
     if (targetDate < startDate) return null;
@@ -118,21 +119,30 @@ function getRecommendedDriver(dateStr) {
     }
 
     const skippedDays = state.trips.filter(t => {
-        const tDate = new Date(t.date);
+        const tDate = parseLocalDate(t.date);
         tDate.setHours(0, 0, 0, 0);
         const esDiaRutina = dias.includes(tDate.getDay());
         const esInactivo = (t.status === 'holiday' || t.status === 'canceled');
         return esDiaRutina && esInactivo && tDate < targetDate;
     }).length;
 
-    const membersActive = state.members.filter(m => !m.is_on_leave);
-    if (membersActive.length === 0) return null;
+    // Full roster keeps cycle length stable; leave shifts turn to next active member
+    const membersSorted = [...state.members].sort((a, b) => a.order_index - b.order_index);
+    const n = membersSorted.length;
+    if (n === 0) return null;
 
-    const membersSorted = [...membersActive].sort((a, b) => a.order_index - b.order_index);
     const effectiveCount = totalRutinaDays - skippedDays;
+    let memberIndex = Math.floor((effectiveCount - 1) / (rutina.consecutivos || 2)) % n;
 
-    const memberIndex = Math.floor((effectiveCount - 1) / (rutina.consecutivos || 2)) % membersSorted.length;
-    return membersSorted[memberIndex]?.user_id;
+    for (let attempt = 0; attempt < n; attempt++) {
+        const candidate = membersSorted[memberIndex];
+        if (!wasOnLeaveOn(candidate, dateStr)) {
+            return candidate.user_id;
+        }
+        memberIndex = (memberIndex + 1) % n;
+    }
+
+    return null;
 }
 
 async function refrescarCalendario() {

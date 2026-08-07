@@ -1,6 +1,8 @@
 // --- GESTIÓN DE VIAJES ---
 
 async function crearViajePuntualDirecto(date) {
+    if (!assertNotPastDate(date)) return;
+
     const { error } = await _supabase.schema('fixed_carpooling').from('fixed_trips').insert({
         group_id: currentGroup.id,
         date: date,
@@ -93,6 +95,7 @@ async function confirmarEliminarRutina() {
 async function pedirRelevo() {
     const dateStr = document.getElementById('modal-viaje').dataset.date;
     if (!currentGroupId || !currentUser) return showToast("Error: Sesión incompleta", "error");
+    if (!assertNotPastDate(dateStr)) return;
 
     try {
         // 1. Check if record exists
@@ -136,8 +139,9 @@ async function pedirRelevo() {
 async function tomarRelevo() {
     const modal = document.getElementById('modal-viaje');
     const date = modal.dataset.date;
-    const defaultDriverId = getRecommendedDriver(date);
     if (!currentGroupId || !currentUser) return;
+    if (!assertNotPastDate(date)) return;
+    const defaultDriverId = getRecommendedDriver(date);
 
     try {
         const { data: existing } = await _supabase.schema('fixed_carpooling').from('fixed_trips')
@@ -197,16 +201,7 @@ async function tomarRelevo() {
 async function marcarEspecial(tipo) {
     const dateStr = document.getElementById('modal-viaje').dataset.date;
     if (!currentGroupId) return showToast("Error: Grupo no seleccionado", "error");
-
-    const targetDate = new Date(dateStr);
-    targetDate.setHours(0, 0, 0, 0);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (targetDate < today) {
-        showToast(t('fixed.no_modificar_pasadas'), "error");
-        return;
-    }
+    if (!assertNotPastDate(dateStr)) return;
 
     try {
         const { data: existing } = await _supabase.schema('fixed_carpooling').from('fixed_trips')
@@ -248,6 +243,7 @@ async function marcarEspecial(tipo) {
 async function tomarLugar() {
     const dateStr = document.getElementById('modal-viaje').dataset.date;
     if (!currentGroupId || !currentUser) return;
+    if (!assertNotPastDate(dateStr)) return;
 
     try {
         const { data: existing } = await _supabase.schema('fixed_carpooling').from('fixed_trips')
@@ -284,6 +280,7 @@ async function tomarLugar() {
 async function marcarBaja() {
     const dateStr = document.getElementById('modal-viaje').dataset.date;
     if (!currentGroupId || !currentUser) return;
+    if (!assertNotPastDate(dateStr)) return;
 
     try {
         const { data: trip } = await _supabase.schema('fixed_carpooling').from('fixed_trips')
@@ -338,6 +335,7 @@ async function eliminarViajePuntual() {
         showToast("Error de sesión", "error");
         return;
     }
+    if (!assertNotPastDate(dateStr)) return;
 
     try {
         const { data: trip, error: fetchError } = await _supabase.schema('fixed_carpooling').from('fixed_trips')
@@ -407,6 +405,7 @@ async function eliminarViajePuntual() {
 }
 
 async function bajarseViajePuntual(trip) {
+    if (trip?.date && !assertNotPastDate(trip.date)) return;
     if (!await showConfirm(`${t('fixed.confirm_bajarse')}<br><br>${t('fixed.baj_descri')}`)) return;
 
     try {
