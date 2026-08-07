@@ -40,7 +40,7 @@ function renderMembersList() {
         return `
             <div class="p-4 card-dark rounded-2xl flex justify-between items-center shadow-md border-r-4 ${hasCar ? 'border-indigo-500' : 'border-slate-700'}">
                 <div class="flex flex-col">
-                    <span class="font-black text-xs uppercase text-slate-200">${name}</span>
+                    <span class="font-black text-xs uppercase text-slate-200">${escapeHtml(name)}</span>
                     ${hasCar ? `<span class="text-[8px] font-bold text-indigo-400 uppercase mt-1 italic"><i class="fas fa-car mr-1"></i> ${t('flexible.aporto_coche')}</span>` : ''}
                 </div>
                 ${hasCar ? '<div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center"><i class="fas fa-car text-indigo-500 text-xs"></i></div>' : '<div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center"><i class="fas fa-user text-slate-600 text-xs"></i></div>'}
@@ -151,21 +151,21 @@ async function renderTrips() {
                 <div class="flex justify-between items-start">
                     <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">${labelType}</span>
                     <div class="text-right text-[8px] font-bold text-slate-500 uppercase">
-                        ${t('flexible.conductor_sugerido')}: <span class="text-white">${propName}</span><br>
-                        ${t('flexible.conductor_real')}: <span class="text-green-400 font-black">${realName}</span>
+                        ${t('flexible.conductor_sugerido')}: <span class="text-white">${escapeHtml(propName)}</span><br>
+                        ${t('flexible.conductor_real')}: <span class="text-green-400 font-black">${escapeHtml(realName)}</span>
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-2">
                     ${paxDetails.map(p => `
                         <div class="bg-slate-900 px-3 py-1 rounded-full text-[8px] font-bold ${p?.user_id === trip.real_driver_id ? 'border border-green-500 text-green-400' : 'text-slate-300 border border-slate-800'}">
-                            ${p?.display_name || p?.user_email.split('@')[0]}
+                            ${escapeHtml(p?.display_name || p?.user_email?.split('@')[0] || '')}
                         </div>`).join('')}
                 </div>
                 <select onchange="setRealDriver('${trip.id}', this.value)" 
                     ${isPast ? 'disabled' : ''}
                     class="w-full bg-slate-900 p-3 rounded-xl text-[10px] text-slate-300 border-none outline-none ${isPast ? 'cursor-not-allowed' : ''}">
                     <option value="">${t('flexible.quien_condujo')}</option>
-                    ${candidates.map(d => `<option value="${d.user_id}" ${trip.real_driver_id === d.user_id ? 'selected' : ''}>${d.display_name || d.user_email.split('@')[0]}</option>`).join('')}
+                    ${candidates.map(d => `<option value="${escapeHtml(d.user_id)}" ${trip.real_driver_id === d.user_id ? 'selected' : ''}>${escapeHtml(d.display_name || d.user_email.split('@')[0])}</option>`).join('')}
                 </select>
                 <button onclick="toggleTrip('${trip.id}', ${isI}, ${ps.length})" 
                     ${isPast ? 'disabled' : ''}
@@ -256,15 +256,19 @@ async function renderManageGroups() {
         <div class="p-4 bg-slate-900 rounded-2xl flex justify-between items-center border border-slate-800">
             <div class="flex flex-col text-left">
                 <span class="text-[8px] font-black ${g.type === 'flexible' ? 'text-indigo-400' : g.type === 'fixed' ? 'text-amber-400' : 'text-emerald-400'} uppercase">${t('group_type.' + g.type)}</span>
-                <span class="font-black text-[10px] uppercase italic text-slate-200">${g.name}</span>
-                <span class="text-[8px] font-bold text-slate-500 tracking-widest mt-1">${g.code}</span>
+                <span class="font-black text-[10px] uppercase italic text-slate-200">${escapeHtml(g.name)}</span>
+                <span class="text-[8px] font-bold text-slate-500 tracking-widest mt-1">${escapeHtml(g.code)}</span>
             </div>
-            <button onclick="leaveGroupConfirm('${g.id}', '${g.name}', '${g.type}')" 
-                class="bg-red-500/10 text-red-500 px-3 py-2 rounded-lg text-[9px] font-black uppercase border border-red-500/20">
+            <button type="button" data-leave-id="${escapeHtml(g.id)}" data-leave-name="${escapeHtml(g.name)}" data-leave-type="${escapeHtml(g.type)}"
+                class="btn-leave-group bg-red-500/10 text-red-500 px-3 py-2 rounded-lg text-[9px] font-black uppercase border border-red-500/20">
                 ${t('shared.salir')}
             </button>
         </div>
     `).join('');
+
+    container.querySelectorAll('.btn-leave-group').forEach(btn => {
+        btn.onclick = () => leaveGroupConfirm(btn.dataset.leaveId, btn.dataset.leaveName, btn.dataset.leaveType);
+    });
 }
 
 async function leaveGroupConfirm(groupId, name, type) {

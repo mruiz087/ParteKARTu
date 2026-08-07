@@ -48,6 +48,14 @@ const translations = {
         'shared.password_updated': '¡Contraseña actualizada! Ya puedes iniciar sesión.',
         'shared.password_update_error': 'Error al actualizar la contraseña.',
         'shared.password_too_short': 'La contraseña debe tener al menos 6 caracteres.',
+        'shared.entrar': 'Entrar',
+        'shared.registrarse': 'Registrarse',
+        'shared.fill_fields': 'Rellena los campos',
+        'shared.login_error': 'Email o contraseña incorrectos',
+        'shared.register_ok': 'Cuenta creada. Ya puedes usar la app.',
+        'shared.register_check_email': 'Revisa tu email para confirmar la cuenta.',
+        'shared.create_group_error': 'No se pudo crear el grupo',
+        'shared.join_group_error': 'No se pudo unir al grupo',
 
         // ===== GROUP TYPES =====
         'group_type.flexible': '🔄 Carpool flexible',
@@ -256,6 +264,14 @@ const translations = {
         'shared.password_updated': 'Pasahitza eguneratuta! Orain saioa has dezakezu.',
         'shared.password_update_error': 'Errore bat gertatu da pasahitza eguneratzean.',
         'shared.password_too_short': 'Pasahitzak gutxienez 6 karaktere eduki behar ditu.',
+        'shared.entrar': 'Sartu',
+        'shared.registrarse': 'Erregistratu',
+        'shared.fill_fields': 'Bete eremuak',
+        'shared.login_error': 'Email edo pasahitz okerra',
+        'shared.register_ok': 'Kontua sortuta. Aplikazioa erabil dezakezu.',
+        'shared.register_check_email': 'Egiaztatu zure emaila kontua baieztatzeko.',
+        'shared.create_group_error': 'Ezin izan da taldea sortu',
+        'shared.join_group_error': 'Ezin izan da taldera sartu',
 
         // ===== GROUP TYPES =====
         'group_type.flexible': '🔄 Malgua',

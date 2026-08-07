@@ -64,32 +64,30 @@ async function guardarConfiguracionMaestra() {
 async function confirmarEliminarRutina() {
     if (!currentGroup) return;
 
-    showConfirm(
-        `${t('fixed.confirm_elim_rutina')} <strong>"${currentGroup.name}"</strong>?<br><br>${t('fixed.elim_rutina_desc')}`,
-        async () => {
-            try {
-                const { error } = await _supabase.from('groups')
-                    .update({
-                        metadata: { ...currentGroup.metadata, rutina: { dias: [], fecha_inicio: null } }
-                    })
-                    .eq('id', currentGroup.id);
-
-                if (error) throw error;
-
-                if (currentGroup.metadata) {
-                    currentGroup.metadata.rutina = { dias: [], fecha_inicio: null };
-                }
-
-                showToast(t('fixed.rutina_eliminada'));
-
-                await refreshFixedData();
-
-            } catch (err) {
-                console.error("Error al eliminar rutina:", err);
-                showToast(t('fixed.error_eliminar'), "error");
-            }
-        }
+    const ok = await showConfirm(
+        `${t('fixed.confirm_elim_rutina')} "${currentGroup.name}"? ${t('fixed.elim_rutina_desc')}`
     );
+    if (!ok) return;
+
+    try {
+        const { error } = await _supabase.from('groups')
+            .update({
+                metadata: { ...currentGroup.metadata, rutina: { dias: [], fecha_inicio: null } }
+            })
+            .eq('id', currentGroup.id);
+
+        if (error) throw error;
+
+        if (currentGroup.metadata) {
+            currentGroup.metadata.rutina = { dias: [], fecha_inicio: null };
+        }
+
+        showToast(t('fixed.rutina_eliminada'));
+        await refreshFixedData();
+    } catch (err) {
+        console.error("Error al eliminar rutina:", err);
+        showToast(t('fixed.error_eliminar'));
+    }
 }
 
 async function pedirRelevo() {
@@ -320,19 +318,11 @@ async function marcarBaja() {
 }
 
 async function eliminarViajePuntual() {
-    console.log("[DEBUG] Iniciando eliminación de viaje puntual...");
     const modal = document.getElementById('modal-viaje');
     const dateStr = modal.dataset.date;
 
-    console.log("[DEBUG] Metadata:", {
-        dateStr,
-        currentGroupId,
-        currentUserId: currentUser?.id
-    });
-
     if (!currentGroupId || !currentUser?.id) {
-        console.error("[DEBUG] Error: Estado global incompleto", { currentGroupId, currentUser });
-        showToast("Error de sesión", "error");
+        showToast("Error de sesión");
         return;
     }
     if (!assertNotPastDate(dateStr)) return;
@@ -345,62 +335,47 @@ async function eliminarViajePuntual() {
             .single();
 
         if (fetchError || !trip) {
-            console.error("[DEBUG] Error al buscar el viaje o búscueda vacía:", fetchError, trip);
-            showToast(t('fixed.viaje_no_encontrado'), "error");
+            showToast(t('fixed.viaje_no_encontrado'));
             return;
         }
 
-        console.log("[DEBUG] Viaje encontrado en DB:", trip);
-
         if (trip.type !== 'single') {
-            console.warn("[DEBUG] El viaje no es de tipo 'single':", trip.type);
-            showToast(t('fixed.sin_permisos'), "error"); // O un mensaje más específico si existe
+            showToast(t('fixed.sin_permisos'));
             return;
         }
 
         if (trip.creator_id !== currentUser.id) {
-            console.warn("[DEBUG] Permisos insuficientes. Creador en DB:", trip.creator_id, "Usuario actual:", currentUser.id);
-            showToast(t('fixed.sin_permisos'), "error");
+            showToast(t('fixed.sin_permisos'));
             return;
         }
 
         const confirmed = await showConfirm(`${t('fixed.confirm_elim_viaje')} ${t('fixed.elim_viaje_desc')}`);
-        console.log("[DEBUG] Confirmación del usuario:", confirmed);
         if (!confirmed) return;
 
-        console.log("[DEBUG] Procediendo a borrar viaje y deudas asociadas...");
-
         const pasajeros = trip.metadata?.pasajeros || [];
-        console.log("[DEBUG] Pasajeros a limpiar deudas:", pasajeros);
 
         for (const pasajeroId of pasajeros) {
-            const { error: dErr } = await _supabase.schema('fixed_carpooling').from('fixed_debts')
+            await _supabase.schema('fixed_carpooling').from('fixed_debts')
                 .delete()
                 .eq('group_id', currentGroupId)
                 .eq('creditor_id', currentUser.id)
                 .eq('debtor_id', pasajeroId);
-
-            if (dErr) console.warn("[DEBUG] Error (no crítico) al borrar deuda de pasajero:", pasajeroId, dErr);
         }
 
         const { error: tripError } = await _supabase.schema('fixed_carpooling').from('fixed_trips')
             .delete()
             .eq('id', trip.id);
 
-        if (tripError) {
-            console.error("[DEBUG] Error crítico de Supabase al borrar el viaje:", tripError);
-            throw tripError;
-        }
+        if (tripError) throw tripError;
 
-        console.log("[DEBUG] Viaje borrado exitosamente");
         showToast(t('fixed.viaje_eliminado'));
         await refreshFixedData();
         cerrarModal();
         renderFixedCalendar();
 
     } catch (err) {
-        console.error("[DEBUG] Error capturado en el catch:", err);
-        showToast(t('fixed.error_eliminar'), "error");
+        console.error(err);
+        showToast(t('fixed.error_eliminar'));
     }
 }
 

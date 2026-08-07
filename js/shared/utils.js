@@ -38,3 +38,33 @@ function showConfirm(message) {
         okBtn.addEventListener('click', onOk);
     });
 }
+
+/** Escape text for safe use inside HTML. */
+function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+/** 8-char uppercase join code using crypto (new groups only). */
+function generateGroupCode(length = 8) {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const bytes = new Uint8Array(length);
+    crypto.getRandomValues(bytes);
+    let out = '';
+    for (let i = 0; i < length; i++) {
+        out += alphabet[bytes[i] % alphabet.length];
+    }
+    return out;
+}
+
+Object.assign(window, {
+    showToast,
+    showConfirm,
+    escapeHtml,
+    generateGroupCode
+});

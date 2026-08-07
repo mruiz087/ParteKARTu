@@ -49,21 +49,28 @@ async function loadUserData() {
 async function createGroup() {
     const name = document.getElementById('new-group-name').value.trim();
     if (!name) return;
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const code = generateGroupCode(8);
     const type = selectedGroupType;
 
     const { data: newGroup, error } = await _supabase.from('groups').insert({ name, code, owner_id: user.id, type }).select().single();
-    if (error) return;
+    if (error) {
+        showToast(t('shared.create_group_error'));
+        return;
+    }
 
     // Insert into appropriate schema based on type
     if (type === 'flexible') {
-        await _supabase.schema('flexible_carpooling').from('flexible_members').insert({
+        const { error: memErr } = await _supabase.schema('flexible_carpooling').from('flexible_members').insert({
             group_id: newGroup.id,
             user_id: user.id,
             user_email: user.email,
             display_name: user.email.split('@')[0],
             aporta_coche: false
         });
+        if (memErr) {
+            showToast(t('shared.create_group_error'));
+            return;
+        }
     } else if (type === 'fixed') {
         await createFixedGroupMember(newGroup.id);
     } else if (type === 'parking') {
@@ -155,7 +162,7 @@ async function joinGroup() {
         switchTab('grupos');
     } catch (err) {
         console.error(err);
-        showToast("Error al unirse");
+        showToast(t('shared.join_group_error'));
     } finally {
         btn.disabled = false;
         btn.style.opacity = "1";
@@ -247,12 +254,6 @@ async function loadFlexibleTrips() {
         .select('*')
         .eq('group_id', currentGroupId);
     allTrips = trips || [];
-}
-
-// Redundant function removed
-
-async function updateCarStatus() {
-    await _supabase.schema('flexible_carpooling').from('flexible_members').update({ aporta_coche: document.getElementById('user-has-car').checked }).eq('user_id', user.id);
 }
 
 async function confirmTripCreation() {
@@ -358,7 +359,6 @@ Object.assign(window, {
     loadFlexibleGroupDetail,
     loadFlexibleTrips,
     updateProfileName,
-    updateCarStatus,
     confirmTripCreation,
     setRealDriver,
     toggleTrip,

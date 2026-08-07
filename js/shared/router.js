@@ -89,14 +89,14 @@ async function loadAllGroups() {
     const groups = groupData || [];
 
     document.getElementById('html-groups-list').innerHTML = groups.map(g => `
-        <div onclick="loadGroupDetail('${g.id}')" class="p-6 card-dark rounded-3xl cursor-pointer border-l-8 ${g.type === 'flexible' ? 'border-indigo-600' : g.type === 'fixed' ? 'border-amber-600' : 'border-emerald-600'} shadow-md">
+        <div onclick="loadGroupDetail('${escapeHtml(g.id)}')" class="p-6 card-dark rounded-3xl cursor-pointer border-l-8 ${g.type === 'flexible' ? 'border-indigo-600' : g.type === 'fixed' ? 'border-amber-600' : 'border-emerald-600'} shadow-md">
             <div class="flex justify-between items-center">
                 <div class="flex flex-col gap-2 items-start text-left">
                     <div class="flex items-center gap-2">
                         <span class="text-[9px] font-black ${g.type === 'flexible' ? 'text-indigo-400' : g.type === 'fixed' ? 'text-amber-400' : 'text-emerald-400'}">${t('group_type.' + g.type)}</span>
                     </div>
-                    <span class="font-black text-sm uppercase italic text-slate-200">${g.name}</span>
-                    <span class="text-[11px] font-bold text-white tracking-widest bg-slate-900 w-24 py-1.5 rounded-lg inline-block text-center">${g.code}</span>
+                    <span class="font-black text-sm uppercase italic text-slate-200">${escapeHtml(g.name)}</span>
+                    <span class="text-[11px] font-bold text-white tracking-widest bg-slate-900 w-24 py-1.5 rounded-lg inline-block text-center">${escapeHtml(g.code)}</span>
                 </div>
                 <i class="fas fa-chevron-right text-slate-700"></i>
             </div>

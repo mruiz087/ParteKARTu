@@ -88,7 +88,7 @@ async function abrirMenuViaje(dStr, trip, driverId) {
                             </div>
                             <div class="flex items-center gap-3 bg-slate-800 p-3 rounded-lg">
                                 <div class="w-4 h-4 rounded-full" style="background: ${conductor?.color || '#6366f1'}"></div>
-                                <span class="text-sm font-bold text-white">${conductor?.display_name || t('fixed.conductor')}</span>
+                                <span class="text-sm font-bold text-white">${escapeHtml(conductor?.display_name || t('fixed.conductor'))}</span>
                             </div>
                             
                             ${pasajerosInfo.length > 0 ? `
@@ -100,8 +100,8 @@ async function abrirMenuViaje(dStr, trip, driverId) {
                                     <div class="space-y-2">
                                         ${pasajerosInfo.map(p => `
                                             <div class="flex items-center gap-3 bg-slate-800 p-3 rounded-lg">
-                                                <div class="w-4 h-4 rounded-full" style="background: ${p.color}"></div>
-                                                <span class="text-sm font-bold text-white">${p.nombre}</span>
+                                                <div class="w-4 h-4 rounded-full" style="background: ${escapeHtml(p.color)}"></div>
+                                                <span class="text-sm font-bold text-white">${escapeHtml(p.nombre)}</span>
                                                 ${p.id === currentUser.id ? '<span class="text-[8px] font-black text-indigo-400 ml-auto uppercase">(Tú)</span>' : ''}
                                             </div>
                                         `).join('')}
@@ -248,7 +248,8 @@ function configurarViaje(type) {
 }
 
 function toggleDay(day) {
-    const btn = document.querySelector(`.day-btn-pill[data-day="${day}"]`);
+    const btn = document.querySelector(`#modal-config-rutina .day-btn-pill[data-day="${day}"]`);
+    if (!btn) return;
     if (selectedDays.includes(day)) {
         selectedDays = selectedDays.filter(d => d !== day);
         btn.classList.remove('active');
@@ -262,7 +263,7 @@ function renderOrderSetup() {
     const cont = document.getElementById('order-setup-list');
     cont.innerHTML = state.members.map((m, i) => `
         <div class="flex items-center justify-between bg-slate-900 p-3 rounded-xl border border-slate-700">
-            <span class="text-xs font-bold">${m.display_name}</span>
+            <span class="text-xs font-bold">${escapeHtml(m.display_name)}</span>
             <input type="number" value="${m.order_index || i + 1}" class="w-12 bg-slate-800 text-center rounded text-indigo-400 font-bold border-none" id="order-input-${i}" onchange="updateOrder(${i})" oninput="updateOrder(${i})">
         </div>
     `).join('');

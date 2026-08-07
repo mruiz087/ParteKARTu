@@ -82,8 +82,8 @@ async function renderFixedCalendar() {
     if (legend) {
         legend.innerHTML = state.members.map(m => `
             <div class="flex items-center gap-1.5 ${m.is_on_leave ? 'opacity-50' : ''}">
-                <div class="w-3 h-3 rounded-full" style="background: ${m.color}"></div>
-                <span class="text-[10px] font-bold uppercase text-slate-400">${m.display_name}${m.is_on_leave ? ' ' + t('fixed.de_baja') : ''}</span>
+                <div class="w-3 h-3 rounded-full" style="background: ${escapeHtml(m.color || '#334155')}"></div>
+                <span class="text-[10px] font-bold uppercase text-slate-400">${escapeHtml(m.display_name)}${m.is_on_leave ? ' ' + t('fixed.de_baja') : ''}</span>
             </div>
         `).join('');
     }

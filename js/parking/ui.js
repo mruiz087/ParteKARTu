@@ -230,7 +230,7 @@ function openParkingDayDetail(dateIsoStr) {
                 <div class="flex items-center justify-between p-3 rounded-xl border ${rowBg} ${isMe ? 'ring-1 ring-indigo-400' : ''} ${!a.isAttending ? 'opacity-50' : ''}">
                     <div class="flex items-center gap-3">
                         <div class="flex flex-col">
-                            <span class="text-white font-bold text-sm ${isMe ? 'text-indigo-300' : ''}">${a.user.display_name}</span>
+                            <span class="text-white font-bold text-sm ${isMe ? 'text-indigo-300' : ''}">${escapeHtml(a.user.display_name)}</span>
                             <span class="text-[10px] uppercase tracking-widest font-black ${statusColor}">${statusLabel}</span>
                         </div>
                     </div>
@@ -285,7 +285,7 @@ function openParkingDayDetail(dateIsoStr) {
             <div class="flex items-center justify-between p-3 rounded-xl border ${rowBg} ${isMe ? 'ring-1 ring-emerald-400' : ''} ${!a.isAttending ? 'opacity-40' : ''}">
                 <div class="flex items-center gap-3">
                     <div class="flex flex-col">
-                        <span class="text-white font-bold text-sm ${isMe ? 'text-emerald-300' : ''}">${a.user.display_name}</span>
+                        <span class="text-white font-bold text-sm ${isMe ? 'text-emerald-300' : ''}">${escapeHtml(a.user.display_name)}</span>
                         <div class="flex items-center gap-2">
                              <span class="text-[9px] font-black px-1.5 bg-slate-900 text-slate-400 rounded border border-slate-700">${a.moldValue}</span>
                              <span class="text-[10px] uppercase tracking-widest font-black ${statusColor}">${statusLabel}</span>
@@ -483,7 +483,7 @@ function openParkingMembersModal() {
                             <i class="fas fa-lock"></i>
                         </div>
                         <div class="flex flex-col">
-                            <span class="text-white font-bold text-sm">${m.display_name}</span>
+                            <span class="text-white font-bold text-sm">${escapeHtml(m.display_name)}</span>
                             <span class="text-[9px] uppercase tracking-widest text-indigo-400 font-black">PLAZA FIJA</span>
                         </div>
                     </div>
@@ -521,7 +521,7 @@ function openParkingMembersModal() {
                         ${moldValue}
                     </div>
                     <div class="flex flex-col">
-                        <span class="text-white font-bold text-sm">${m.display_name}</span>
+                        <span class="text-white font-bold text-sm">${escapeHtml(m.display_name)}</span>
                         <span class="text-[9px] uppercase tracking-widest ${statusColor} font-black">${statusText}</span>
                     </div>
                 </div>
@@ -619,7 +619,7 @@ function renderSpotsList() {
 
     list.innerHTML = window.parkingState.spots.map(s => `
         <div class="flex justify-between items-center bg-slate-900/50 p-3 rounded-xl border border-slate-700">
-            <span class="text-sm font-bold text-slate-300">${s.name}</span>
+            <span class="text-sm font-bold text-slate-300">${escapeHtml(s.name)}</span>
             <button onclick="handleDeleteSpot('${s.id}')" class="text-red-400 hover:text-red-300 p-2">
                 <i class="fas fa-trash"></i>
             </button>

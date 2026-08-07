@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gidapark-v2.5';
+const CACHE_NAME = 'gidapark-v2.6';
 const assets = [
     'index.html',
     'manifest.json',

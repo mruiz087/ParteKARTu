@@ -183,7 +183,7 @@ async function abrirCanjeDeuda() {
         btn.innerHTML = `
             <div class="flex flex-col">
                 <span class="text-[10px] uppercase font-black text-indigo-300">${t('fixed.deudor')}</span>
-                <span class="font-bold text-white">${deudor?.display_name || 'Usuario'}</span>
+                <span class="font-bold text-white">${escapeHtml(deudor?.display_name || 'Usuario')}</span>
             </div>
             <div class="text-right">
                 <span class="block text-[14px] font-black text-white">${deuda.amount}</span>
@@ -310,7 +310,7 @@ async function abrirCrearDeuda() {
         btn.innerHTML = `
             <div class="flex items-center gap-3">
                 <div class="w-4 h-4 rounded-full" style="background: ${miembro.color}"></div>
-                <span class="font-bold text-white">${miembro.display_name}</span>
+                <span class="font-bold text-white">${escapeHtml(miembro.display_name)}</span>
             </div>
             <i class="fas fa-plus text-emerald-400"></i>
         `;
@@ -390,13 +390,13 @@ async function abrirTablaDeudas() {
                 <td class="py-3 px-2">
                     <div class="flex items-center gap-2">
                         <div class="w-3 h-3 rounded-full" style="background: ${acreedor?.color || '#6366f1'}"></div>
-                        <span class="text-white font-bold text-sm">${acreedor?.display_name || 'Usuario'}</span>
+                        <span class="text-white font-bold text-sm">${escapeHtml(acreedor?.display_name || 'Usuario')}</span>
                     </div>
                 </td>
                 <td class="py-3 px-2">
                     <div class="flex items-center gap-2">
                         <div class="w-3 h-3 rounded-full" style="background: ${deudor?.color || '#6366f1'}"></div>
-                        <span class="text-white font-bold text-sm">${deudor?.display_name || 'Usuario'}</span>
+                        <span class="text-white font-bold text-sm">${escapeHtml(deudor?.display_name || 'Usuario')}</span>
                     </div>
                 </td>
                 <td class="py-3 px-2 text-center">

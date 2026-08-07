@@ -43,19 +43,47 @@ function changeMonth(delta) {
     }
 }
 
+function showAuthScreen() {
+    document.getElementById('loading-overlay').classList.add('hidden');
+    document.getElementById('auth-screen').classList.remove('hidden');
+    document.getElementById('auth-screen').classList.add('flex');
+}
+
+function showRecoveryModal() {
+    document.getElementById('loading-overlay').classList.add('hidden');
+    document.getElementById('modal-new-password').classList.remove('hidden');
+    document.getElementById('modal-new-password').classList.add('flex');
+}
+
 // Authentication
 window.onload = async () => {
-    // Detect password recovery token in URL (Supabase sends #access_token=...&type=recovery)
     const hash = window.location.hash;
-    if (hash && hash.includes('type=recovery')) {
-        // Let Supabase process the token from the URL
-        const { data, error } = await _supabase.auth.getSession();
-        document.getElementById('loading-overlay').classList.add('hidden');
-        // Show the new password modal directly
-        document.getElementById('modal-new-password').classList.remove('hidden');
-        document.getElementById('modal-new-password').classList.add('flex');
-        // Clean URL so the token isn't re-used on refresh
-        history.replaceState(null, '', window.location.pathname);
+    const isRecoveryHash = hash && hash.includes('type=recovery');
+
+    if (isRecoveryHash) {
+        // Wait for Supabase to parse the recovery token from the URL hash
+        const { data: { subscription } } = _supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
+                showRecoveryModal();
+                history.replaceState(null, '', window.location.pathname);
+                subscription.unsubscribe();
+            }
+        });
+
+        const { data } = await _supabase.auth.getSession();
+        if (data?.session) {
+            showRecoveryModal();
+            history.replaceState(null, '', window.location.pathname);
+            subscription.unsubscribe();
+            return;
+        }
+
+        // Fallback if event already fired before listener
+        setTimeout(() => {
+            showRecoveryModal();
+            history.replaceState(null, '', window.location.pathname);
+            subscription.unsubscribe();
+        }, 1500);
         return;
     }
 
@@ -64,29 +92,48 @@ window.onload = async () => {
 
     if (data?.session) {
         user = data.session.user;
-        currentUser = user; // For fixed modules
+        currentUser = user;
         startApp();
     } else {
-        document.getElementById('auth-screen').classList.remove('hidden');
-        document.getElementById('auth-screen').classList.add('flex');
+        applyTranslations();
+        showAuthScreen();
     }
 };
 
+function getAuthCredentials() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    return { email, password };
+}
+
 document.getElementById('btn-login').onclick = async () => {
-    const email = document.getElementById('email').value, password = document.getElementById('password').value;
-    if (!email || !password) return alert("Rellena los campos");
+    const { email, password } = getAuthCredentials();
+    if (!email || !password) return alert(t('shared.fill_fields'));
 
     const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-        const s = await _supabase.auth.signUp({ email, password });
-        if (s.error) return alert(s.error.message);
-        user = s.data.user;
-        currentUser = user;
-    } else {
+    if (error) return alert(t('shared.login_error'));
+
+    user = data.user;
+    currentUser = user;
+    startApp();
+};
+
+document.getElementById('btn-register').onclick = async () => {
+    const { email, password } = getAuthCredentials();
+    if (!email || !password) return alert(t('shared.fill_fields'));
+
+    const { data, error } = await _supabase.auth.signUp({ email, password });
+    if (error) return alert(error.message);
+
+    if (data.session && data.user) {
         user = data.user;
         currentUser = user;
+        showToast(t('shared.register_ok'));
+        startApp();
+    } else {
+        // Email confirmation may be required
+        alert(t('shared.register_check_email'));
     }
-    startApp();
 };
 
 async function startApp() {
